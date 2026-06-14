@@ -12,6 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as DashboardVoiceRouteImport } from './routes/dashboard.voice'
+import { Route as DashboardTutorRouteImport } from './routes/dashboard.tutor'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
+import { Route as DashboardQuizRouteImport } from './routes/dashboard.quiz'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardMaterialsRouteImport } from './routes/dashboard.materials'
+import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -28,28 +35,114 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardVoiceRoute = DashboardVoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTutorRoute = DashboardTutorRouteImport.update({
+  id: '/tutor',
+  path: '/tutor',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardQuizRoute = DashboardQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMaterialsRoute = DashboardMaterialsRouteImport.update({
+  id: '/materials',
+  path: '/materials',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/materials': typeof DashboardMaterialsRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/quiz': typeof DashboardQuizRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/tutor': typeof DashboardTutorRoute
+  '/dashboard/voice': typeof DashboardVoiceRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/materials': typeof DashboardMaterialsRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/quiz': typeof DashboardQuizRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/tutor': typeof DashboardTutorRoute
+  '/dashboard/voice': typeof DashboardVoiceRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/materials': typeof DashboardMaterialsRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/quiz': typeof DashboardQuizRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/tutor': typeof DashboardTutorRoute
+  '/dashboard/voice': typeof DashboardVoiceRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/dashboard/analytics'
+    | '/dashboard/materials'
+    | '/dashboard/profile'
+    | '/dashboard/quiz'
+    | '/dashboard/settings'
+    | '/dashboard/tutor'
+    | '/dashboard/voice'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard' | '/dashboard/'
+  to:
+    | '/'
+    | '/dashboard/analytics'
+    | '/dashboard/materials'
+    | '/dashboard/profile'
+    | '/dashboard/quiz'
+    | '/dashboard/settings'
+    | '/dashboard/tutor'
+    | '/dashboard/voice'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/dashboard/analytics'
+    | '/dashboard/materials'
+    | '/dashboard/profile'
+    | '/dashboard/quiz'
+    | '/dashboard/settings'
+    | '/dashboard/tutor'
+    | '/dashboard/voice'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -80,14 +173,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/voice': {
+      id: '/dashboard/voice'
+      path: '/voice'
+      fullPath: '/dashboard/voice'
+      preLoaderRoute: typeof DashboardVoiceRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/tutor': {
+      id: '/dashboard/tutor'
+      path: '/tutor'
+      fullPath: '/dashboard/tutor'
+      preLoaderRoute: typeof DashboardTutorRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/quiz': {
+      id: '/dashboard/quiz'
+      path: '/quiz'
+      fullPath: '/dashboard/quiz'
+      preLoaderRoute: typeof DashboardQuizRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/materials': {
+      id: '/dashboard/materials'
+      path: '/materials'
+      fullPath: '/dashboard/materials'
+      preLoaderRoute: typeof DashboardMaterialsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/analytics': {
+      id: '/dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof DashboardAnalyticsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
+  DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
+  DashboardMaterialsRoute: typeof DashboardMaterialsRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardQuizRoute: typeof DashboardQuizRoute
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardTutorRoute: typeof DashboardTutorRoute
+  DashboardVoiceRoute: typeof DashboardVoiceRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAnalyticsRoute: DashboardAnalyticsRoute,
+  DashboardMaterialsRoute: DashboardMaterialsRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
+  DashboardQuizRoute: DashboardQuizRoute,
+  DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardTutorRoute: DashboardTutorRoute,
+  DashboardVoiceRoute: DashboardVoiceRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
