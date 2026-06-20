@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
   Mic, Brain, FileText, Sparkles, Languages, TrendingUp, Play, ArrowRight,
-  Check, Star, BookOpen, Zap, MessageSquare, BarChart3, Github, Twitter, Linkedin, Youtube,
+  Check, Star, BookOpen, Zap, MessageSquare, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Logo } from "@/components/visual/Logo";
-import { ThemeToggle } from "@/components/visual/ThemeToggle";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { SiteFooter } from "@/components/site/SiteFooter";
 import { MeshBackground, Particles } from "@/components/visual/Backgrounds";
 import { Waveform } from "@/components/visual/Waveform";
 import { testimonials } from "@/lib/mock-data";
@@ -36,26 +36,7 @@ const features = [
 function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* NAV */}
-      <header className="fixed inset-x-0 top-0 z-50">
-        <div className="mx-auto mt-4 max-w-7xl px-4">
-          <nav className="glass-strong flex items-center justify-between rounded-2xl px-4 py-2.5 shadow-soft">
-            <Logo />
-            <div className="hidden items-center gap-8 md:flex">
-              <a href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Features</a>
-              <a href="#testimonials" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Reviews</a>
-              <a href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
-              <Link to="/dashboard" className="text-sm text-muted-foreground transition-colors hover:text-foreground">Dashboard</Link>
-            </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <Button asChild variant="hero" size="sm" className="rounded-full">
-                <Link to="/dashboard">Start Learning</Link>
-              </Button>
-            </div>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* HERO */}
       <section className="relative overflow-hidden pt-40 pb-24">
@@ -320,44 +301,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-border/50 py-12">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div>
-              <Logo />
-              <p className="mt-3 max-w-xs text-sm text-muted-foreground">
-                Your personal voice-powered AI learning companion. Built for the next generation of learners.
-              </p>
-              <div className="mt-4 flex gap-2">
-                {[Linkedin, Github, Twitter, Youtube].map((Icon, i) => (
-                  <a key={i} href="#" className="grid h-9 w-9 place-items-center rounded-lg border border-border/50 text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground">
-                    <Icon className="h-4 w-4" />
-                  </a>
-                ))}
-              </div>
-            </div>
-            {[
-              { title: "Product", links: ["Features", "Voice Assistant", "AI Tutor", "Pricing"] },
-              { title: "Resources", links: ["Documentation", "Guides", "Blog", "Community"] },
-              { title: "Company", links: ["About", "Contact", "Careers", "Privacy"] },
-            ].map((col) => (
-              <div key={col.title}>
-                <h4 className="text-sm font-semibold">{col.title}</h4>
-                <ul className="mt-3 space-y-2">
-                  {col.links.map((l) => (
-                    <li key={l}><a href="#" className="text-sm text-muted-foreground transition-colors hover:text-foreground">{l}</a></li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-6 text-xs text-muted-foreground">
-            <p>© 2026 LearnMate AI. All rights reserved.</p>
-            <p>Made with 💜 for learners.</p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
