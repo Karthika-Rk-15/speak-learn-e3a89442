@@ -22,6 +22,8 @@ import { Route as DashboardQuizRouteImport } from './routes/dashboard.quiz'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
 import { Route as DashboardMaterialsRouteImport } from './routes/dashboard.materials'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
+import { Route as ApiTutorRouteImport } from './routes/api/tutor'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
 
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
@@ -88,6 +90,16 @@ const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiTutorRoute = ApiTutorRouteImport.update({
+  id: '/api/tutor',
+  path: '/api/tutor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,6 +107,8 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/reviews': typeof ReviewsRoute
+  '/api/tts': typeof ApiTtsRoute
+  '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/materials': typeof DashboardMaterialsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -109,6 +123,8 @@ export interface FileRoutesByTo {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/reviews': typeof ReviewsRoute
+  '/api/tts': typeof ApiTtsRoute
+  '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/materials': typeof DashboardMaterialsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -125,6 +141,8 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/reviews': typeof ReviewsRoute
+  '/api/tts': typeof ApiTtsRoute
+  '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/materials': typeof DashboardMaterialsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -142,6 +160,8 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/reviews'
+    | '/api/tts'
+    | '/api/tutor'
     | '/dashboard/analytics'
     | '/dashboard/materials'
     | '/dashboard/profile'
@@ -156,6 +176,8 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/reviews'
+    | '/api/tts'
+    | '/api/tutor'
     | '/dashboard/analytics'
     | '/dashboard/materials'
     | '/dashboard/profile'
@@ -171,6 +193,8 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/reviews'
+    | '/api/tts'
+    | '/api/tutor'
     | '/dashboard/analytics'
     | '/dashboard/materials'
     | '/dashboard/profile'
@@ -187,6 +211,8 @@ export interface RootRouteChildren {
   FeaturesRoute: typeof FeaturesRoute
   PricingRoute: typeof PricingRoute
   ReviewsRoute: typeof ReviewsRoute
+  ApiTtsRoute: typeof ApiTtsRoute
+  ApiTutorRoute: typeof ApiTutorRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -282,6 +308,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAnalyticsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/api/tutor': {
+      id: '/api/tutor'
+      path: '/api/tutor'
+      fullPath: '/api/tutor'
+      preLoaderRoute: typeof ApiTutorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -317,6 +357,8 @@ const rootRouteChildren: RootRouteChildren = {
   FeaturesRoute: FeaturesRoute,
   PricingRoute: PricingRoute,
   ReviewsRoute: ReviewsRoute,
+  ApiTtsRoute: ApiTtsRoute,
+  ApiTutorRoute: ApiTutorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
