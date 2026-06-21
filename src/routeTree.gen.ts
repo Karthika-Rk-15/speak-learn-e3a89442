@@ -24,6 +24,7 @@ import { Route as DashboardMaterialsRouteImport } from './routes/dashboard.mater
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as ApiTutorRouteImport } from './routes/api/tutor'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiAskPdfRouteImport } from './routes/api/ask-pdf'
 
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
@@ -100,6 +101,11 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
   path: '/api/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAskPdfRoute = ApiAskPdfRouteImport.update({
+  id: '/api/ask-pdf',
+  path: '/api/ask-pdf',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/reviews': typeof ReviewsRoute
+  '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/reviews': typeof ReviewsRoute
+  '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
   '/reviews': typeof ReviewsRoute
+  '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/reviews'
+    | '/api/ask-pdf'
     | '/api/tts'
     | '/api/tutor'
     | '/dashboard/analytics'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/reviews'
+    | '/api/ask-pdf'
     | '/api/tts'
     | '/api/tutor'
     | '/dashboard/analytics'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/features'
     | '/pricing'
     | '/reviews'
+    | '/api/ask-pdf'
     | '/api/tts'
     | '/api/tutor'
     | '/dashboard/analytics'
@@ -211,6 +223,7 @@ export interface RootRouteChildren {
   FeaturesRoute: typeof FeaturesRoute
   PricingRoute: typeof PricingRoute
   ReviewsRoute: typeof ReviewsRoute
+  ApiAskPdfRoute: typeof ApiAskPdfRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiTutorRoute: typeof ApiTutorRoute
 }
@@ -322,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ask-pdf': {
+      id: '/api/ask-pdf'
+      path: '/api/ask-pdf'
+      fullPath: '/api/ask-pdf'
+      preLoaderRoute: typeof ApiAskPdfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -357,6 +377,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeaturesRoute: FeaturesRoute,
   PricingRoute: PricingRoute,
   ReviewsRoute: ReviewsRoute,
+  ApiAskPdfRoute: ApiAskPdfRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiTutorRoute: ApiTutorRoute,
 }
