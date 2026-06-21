@@ -52,12 +52,40 @@ function MaterialsPage() {
   const [dragOver, setDragOver] = useState(false);
   const [askInput, setAskInput] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
+  const [answerSources, setAnswerSources] = useState<string[]>([]);
+  const [asking, setAsking] = useState(false);
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState<UploadingItem[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const sessionId = typeof window !== "undefined" ? getSessionId() : "anon";
+
+  async function askDocuments() {
+    const q = askInput.trim();
+    if (!q || asking) return;
+    setAsking(true);
+    setAnswer(null);
+    setAnswerSources([]);
+    try {
+      const res = await fetch("/api/ask-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q, sessionId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data?.error ?? "Failed to get an answer");
+      } else {
+        setAnswer(data.answer ?? "No answer returned.");
+        setAnswerSources(data.sources ?? []);
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Network error");
+    } finally {
+      setAsking(false);
+    }
+  }
 
   async function loadDocs() {
     setLoading(true);
