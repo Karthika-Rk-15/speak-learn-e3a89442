@@ -52,12 +52,40 @@ function MaterialsPage() {
   const [dragOver, setDragOver] = useState(false);
   const [askInput, setAskInput] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
+  const [answerSources, setAnswerSources] = useState<string[]>([]);
+  const [asking, setAsking] = useState(false);
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState<UploadingItem[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const sessionId = typeof window !== "undefined" ? getSessionId() : "anon";
+
+  async function askDocuments() {
+    const q = askInput.trim();
+    if (!q || asking) return;
+    setAsking(true);
+    setAnswer(null);
+    setAnswerSources([]);
+    try {
+      const res = await fetch("/api/ask-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: q, sessionId }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data?.error ?? "Failed to get an answer");
+      } else {
+        setAnswer(data.answer ?? "No answer returned.");
+        setAnswerSources(data.sources ?? []);
+      }
+    } catch (e: any) {
+      toast.error(e?.message ?? "Network error");
+    } finally {
+      setAsking(false);
+    }
+  }
 
   async function loadDocs() {
     setLoading(true);
@@ -212,19 +240,32 @@ function MaterialsPage() {
             value={askInput}
             onChange={(e) => setAskInput(e.target.value)}
             placeholder="Ask anything about your uploaded material..."
-            onKeyDown={(e) => e.key === "Enter" && askInput.trim() && setAnswer("Based on your uploaded notes: Process scheduling determines which process gets CPU time. The notes outline FCFS, SJF, Round Robin, and Priority scheduling — with Round Robin being the most fair for time-sharing systems.")}
+            onKeyDown={(e) => { if (e.key === "Enter") askDocuments(); }}
+            disabled={asking}
             className="h-11 rounded-full bg-background"
           />
-          <Button variant="hero" className="rounded-full" onClick={() => askInput.trim() && setAnswer("Based on your uploaded notes: Process scheduling determines which process gets CPU time. The notes outline FCFS, SJF, Round Robin, and Priority scheduling — with Round Robin being the most fair for time-sharing systems.")}>
-            <Send className="h-4 w-4" /> Ask
+          <Button variant="hero" className="rounded-full" onClick={askDocuments} disabled={asking || !askInput.trim()}>
+            {asking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Ask
           </Button>
         </div>
-        {answer && (
-          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-xl bg-background/80 p-4 text-sm leading-relaxed">
+        {asking && (
+          <div className="mt-4 flex items-center gap-2 rounded-xl bg-background/80 p-4 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" /> Reading your documents…
+          </div>
+        )}
+        {answer && !asking && (
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4 rounded-xl bg-background/80 p-4 text-sm leading-relaxed whitespace-pre-wrap">
             <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
               <Sparkles className="h-3.5 w-3.5 text-primary" /> LearnMate AI · sourced from your notes
             </div>
             {answer}
+            {answerSources.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {answerSources.map((s) => (
+                  <Badge key={s} variant="secondary" className="rounded-full text-xs">{s}</Badge>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </Card>
