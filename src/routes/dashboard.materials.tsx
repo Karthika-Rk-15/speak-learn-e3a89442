@@ -47,12 +47,21 @@ function formatSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
+type Citation = {
+  ref: number;
+  document_id: string;
+  document_name: string;
+  page_number: number;
+  snippet: string;
+  similarity: number;
+};
+
 function MaterialsPage() {
   const [query, setQuery] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [askInput, setAskInput] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
-  const [answerSources, setAnswerSources] = useState<string[]>([]);
+  const [citations, setCitations] = useState<Citation[]>([]);
   const [asking, setAsking] = useState(false);
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +75,7 @@ function MaterialsPage() {
     if (!q || asking) return;
     setAsking(true);
     setAnswer(null);
-    setAnswerSources([]);
+    setCitations([]);
     try {
       const res = await fetch("/api/ask-pdf", {
         method: "POST",
@@ -78,7 +87,7 @@ function MaterialsPage() {
         toast.error(data?.error ?? "Failed to get an answer");
       } else {
         setAnswer(data.answer ?? "No answer returned.");
-        setAnswerSources(data.sources ?? []);
+        setCitations((data.citations ?? []) as Citation[]);
       }
     } catch (e: any) {
       toast.error(e?.message ?? "Network error");
