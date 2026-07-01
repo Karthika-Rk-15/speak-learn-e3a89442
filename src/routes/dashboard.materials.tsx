@@ -268,11 +268,22 @@ function MaterialsPage() {
               <Sparkles className="h-3.5 w-3.5 text-primary" /> LearnMate AI · sourced from your notes
             </div>
             {answer}
-            {answerSources.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {answerSources.map((s) => (
-                  <Badge key={s} variant="secondary" className="rounded-full text-xs">{s}</Badge>
-                ))}
+            {citations.length > 0 && (
+              <div className="mt-4 border-t pt-3">
+                <div className="mb-2 text-xs font-medium text-muted-foreground">Sources</div>
+                <div className="grid gap-2">
+                  {citations.map((c) => (
+                    <div key={c.ref} className="rounded-lg border bg-background/60 p-2.5">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <Badge variant="secondary" className="rounded-full">#{c.ref}</Badge>
+                        <span className="font-medium truncate">{c.document_name}</span>
+                        <Badge variant="outline" className="rounded-full">Page {c.page_number}</Badge>
+                        <span className="text-muted-foreground">· {(c.similarity * 100).toFixed(0)}% match</span>
+                      </div>
+                      <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">{c.snippet}…</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </motion.div>
