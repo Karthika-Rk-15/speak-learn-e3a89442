@@ -149,22 +149,41 @@ function MaterialsPage() {
 
       setUploading((u) => u.map((x) => (x.id === tempId ? { ...x, progress: 95 } : x)));
 
-      const { error: insErr } = await supabase.from("documents").insert({
-        session_id: sessionId,
-        file_name: file.name,
-        file_path: path,
-        file_size: file.size,
-        status: "Indexed",
-      });
+      const { data: inserted, error: insErr } = await supabase
+        .from("documents")
+        .insert({
+          session_id: sessionId,
+          file_name: file.name,
+          file_path: path,
+          file_size: file.size,
+          status: "Indexing",
+        })
+        .select("id")
+        .single();
 
-      if (insErr) {
-        toast.error(`Saved file but failed to record: ${insErr.message}`);
-      } else {
-        toast.success(`${file.name} uploaded`);
+      if (insErr || !inserted) {
+        toast.error(`Saved file but failed to record: ${insErr?.message ?? "unknown"}`);
+        setUploading((u) => u.filter((x) => x.id !== tempId));
+        continue;
       }
 
+      toast.success(`${file.name} uploaded · indexing…`);
       setUploading((u) => u.filter((x) => x.id !== tempId));
       await loadDocs();
+
+      // Kick off embedding (fire-and-forget, refresh list when done)
+      fetch("/api/embed-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId: inserted.id }),
+      })
+        .then(async (r) => {
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok) toast.error(`Indexing failed: ${d?.error ?? r.status}`);
+          else toast.success(`${file.name} indexed (${d.chunks} chunks)`);
+        })
+        .catch((e) => toast.error(`Indexing error: ${e?.message ?? e}`))
+        .finally(() => loadDocs());
     }
   }
 
