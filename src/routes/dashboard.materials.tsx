@@ -47,12 +47,21 @@ function formatSize(bytes: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
+type Citation = {
+  ref: number;
+  document_id: string;
+  document_name: string;
+  page_number: number;
+  snippet: string;
+  similarity: number;
+};
+
 function MaterialsPage() {
   const [query, setQuery] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [askInput, setAskInput] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
-  const [answerSources, setAnswerSources] = useState<string[]>([]);
+  const [citations, setCitations] = useState<Citation[]>([]);
   const [asking, setAsking] = useState(false);
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +75,7 @@ function MaterialsPage() {
     if (!q || asking) return;
     setAsking(true);
     setAnswer(null);
-    setAnswerSources([]);
+    setCitations([]);
     try {
       const res = await fetch("/api/ask-pdf", {
         method: "POST",
@@ -78,7 +87,7 @@ function MaterialsPage() {
         toast.error(data?.error ?? "Failed to get an answer");
       } else {
         setAnswer(data.answer ?? "No answer returned.");
-        setAnswerSources(data.sources ?? []);
+        setCitations((data.citations ?? []) as Citation[]);
       }
     } catch (e: any) {
       toast.error(e?.message ?? "Network error");
@@ -140,22 +149,41 @@ function MaterialsPage() {
 
       setUploading((u) => u.map((x) => (x.id === tempId ? { ...x, progress: 95 } : x)));
 
-      const { error: insErr } = await supabase.from("documents").insert({
-        session_id: sessionId,
-        file_name: file.name,
-        file_path: path,
-        file_size: file.size,
-        status: "Indexed",
-      });
+      const { data: inserted, error: insErr } = await supabase
+        .from("documents")
+        .insert({
+          session_id: sessionId,
+          file_name: file.name,
+          file_path: path,
+          file_size: file.size,
+          status: "Indexing",
+        })
+        .select("id")
+        .single();
 
-      if (insErr) {
-        toast.error(`Saved file but failed to record: ${insErr.message}`);
-      } else {
-        toast.success(`${file.name} uploaded`);
+      if (insErr || !inserted) {
+        toast.error(`Saved file but failed to record: ${insErr?.message ?? "unknown"}`);
+        setUploading((u) => u.filter((x) => x.id !== tempId));
+        continue;
       }
 
+      toast.success(`${file.name} uploaded · indexing…`);
       setUploading((u) => u.filter((x) => x.id !== tempId));
       await loadDocs();
+
+      // Kick off embedding (fire-and-forget, refresh list when done)
+      fetch("/api/embed-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId: inserted.id }),
+      })
+        .then(async (r) => {
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok) toast.error(`Indexing failed: ${d?.error ?? r.status}`);
+          else toast.success(`${file.name} indexed (${d.chunks} chunks)`);
+        })
+        .catch((e) => toast.error(`Indexing error: ${e?.message ?? e}`))
+        .finally(() => loadDocs());
     }
   }
 
@@ -259,11 +287,22 @@ function MaterialsPage() {
               <Sparkles className="h-3.5 w-3.5 text-primary" /> LearnMate AI · sourced from your notes
             </div>
             {answer}
-            {answerSources.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {answerSources.map((s) => (
-                  <Badge key={s} variant="secondary" className="rounded-full text-xs">{s}</Badge>
-                ))}
+            {citations.length > 0 && (
+              <div className="mt-4 border-t pt-3">
+                <div className="mb-2 text-xs font-medium text-muted-foreground">Sources</div>
+                <div className="grid gap-2">
+                  {citations.map((c) => (
+                    <div key={c.ref} className="rounded-lg border bg-background/60 p-2.5">
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <Badge variant="secondary" className="rounded-full">#{c.ref}</Badge>
+                        <span className="font-medium truncate">{c.document_name}</span>
+                        <Badge variant="outline" className="rounded-full">Page {c.page_number}</Badge>
+                        <span className="text-muted-foreground">· {(c.similarity * 100).toFixed(0)}% match</span>
+                      </div>
+                      <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">{c.snippet}…</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </motion.div>

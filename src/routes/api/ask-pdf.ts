@@ -3,9 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 type Body = { question: string; sessionId: string };
 
-const BUCKET = "pdf-documents";
-const MAX_CHARS_PER_DOC = 15000;
-const MAX_TOTAL_CHARS = 40000;
+const TOP_K = 6;
 
 export const Route = createFileRoute("/api/ask-pdf")({
   server: {
@@ -20,105 +18,109 @@ export const Route = createFileRoute("/api/ask-pdf")({
           const url = process.env.SUPABASE_URL;
           const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
           const aiKey = process.env.LOVABLE_API_KEY;
-          if (!url || !serviceKey || !aiKey) {
-            return json({ error: "Server not configured" }, 500);
-          }
+          if (!url || !serviceKey || !aiKey) return json({ error: "Server not configured" }, 500);
 
           const admin = createClient(url, serviceKey, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
 
-          const { data: docs, error: docsErr } = await admin
+          // 1) Embed the question
+          const embRes = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "openai/text-embedding-3-small",
+              input: question,
+            }),
+          });
+          if (!embRes.ok) {
+            const t = await embRes.text().catch(() => "");
+            return json({ error: `Embedding failed: ${embRes.status} ${t}` }, 500);
+          }
+          const embData = (await embRes.json()) as { data: { embedding: number[] }[] };
+          const queryEmbedding = embData.data?.[0]?.embedding;
+          if (!queryEmbedding) return json({ error: "No embedding returned" }, 500);
+
+          // 2) Vector similarity search scoped to session
+          const { data: matches, error: matchErr } = await admin.rpc("match_document_chunks", {
+            query_embedding: queryEmbedding as unknown as string,
+            match_session_id: sessionId,
+            match_count: TOP_K,
+          });
+          if (matchErr) return json({ error: matchErr.message }, 500);
+
+          const hits = (matches ?? []) as Array<{
+            id: string;
+            document_id: string;
+            page_number: number;
+            chunk_index: number;
+            chunk_text: string;
+            similarity: number;
+          }>;
+
+          if (hits.length === 0) {
+            return json({
+              answer: "I could not find this information in your uploaded documents.",
+              citations: [],
+            });
+          }
+
+          // 3) Look up document names for citations
+          const docIds = Array.from(new Set(hits.map((h) => h.document_id)));
+          const { data: docs } = await admin
             .from("documents")
-            .select("id, file_name, file_path")
-            .eq("session_id", sessionId)
-            .order("created_at", { ascending: false })
-            .limit(5);
+            .select("id, file_name")
+            .in("id", docIds);
+          const nameById = new Map((docs ?? []).map((d) => [d.id, d.file_name]));
 
-          if (docsErr) return json({ error: docsErr.message }, 500);
-          if (!docs || docs.length === 0) {
-            return json({
-              answer:
-                "You haven't uploaded any documents yet. Upload a PDF above and ask again.",
-              sources: [],
-            });
+          // 4) Build compact context
+          const context = hits
+            .map((h, i) => {
+              const name = nameById.get(h.document_id) ?? "document";
+              return `[#${i + 1} • ${name} • p.${h.page_number}]\n${h.chunk_text}`;
+            })
+            .join("\n\n");
+
+          const system = `You are LearnMate AI, a friendly tutor.
+Answer the user's question using ONLY the CONTEXT below.
+- If the answer is not present, reply exactly: "I could not find this information in your uploaded documents."
+- Do NOT invent facts.
+- Cite the chunk numbers you used inline like [#1], [#3].
+- Use short paragraphs and bullet points where useful.
+
+CONTEXT:
+${context}`;
+
+          const chatRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "google/gemini-3-flash-preview",
+              messages: [
+                { role: "system", content: system },
+                { role: "user", content: question },
+              ],
+            }),
+          });
+          if (!chatRes.ok) {
+            const t = await chatRes.text().catch(() => "");
+            return json({ error: `AI request failed: ${chatRes.status} ${t}` }, chatRes.status);
           }
-
-          const { extractText, getDocumentProxy } = await import("unpdf");
-
-          let combined = "";
-          const sources: string[] = [];
-          for (const d of docs) {
-            if (combined.length >= MAX_TOTAL_CHARS) break;
-            const { data: file, error: dlErr } = await admin.storage
-              .from(BUCKET)
-              .download(d.file_path);
-            if (dlErr || !file) continue;
-            try {
-              const buf = new Uint8Array(await file.arrayBuffer());
-              const pdf = await getDocumentProxy(buf);
-              const { text } = await extractText(pdf, { mergePages: true });
-              const snippet = (Array.isArray(text) ? text.join("\n") : text)
-                .replace(/\s+/g, " ")
-                .slice(0, MAX_CHARS_PER_DOC);
-              if (snippet.trim()) {
-                combined += `\n\n=== ${d.file_name} ===\n${snippet}`;
-                sources.push(d.file_name);
-              }
-            } catch (e) {
-              console.error("PDF parse failed for", d.file_name, e);
-            }
-          }
-
-          if (!combined.trim()) {
-            return json({
-              answer:
-                "I couldn't extract readable text from your uploaded PDFs (they may be scanned images). Try uploading a text-based PDF.",
-              sources: [],
-            });
-          }
-
-          const system = `You are LearnMate AI, a friendly tutor that answers questions strictly based on the user's uploaded study materials provided below.
-
-Rules:
-- Only use the provided document context to answer.
-- If the answer isn't in the documents, say so honestly and suggest what to upload.
-- Cite the document name(s) you used at the end.
-- Use clean Markdown with short paragraphs and bullet points.
-
-DOCUMENT CONTEXT:
-${combined}`;
-
-          const res = await fetch(
-            "https://ai.gateway.lovable.dev/v1/chat/completions",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${aiKey}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                model: "google/gemini-3-flash-preview",
-                messages: [
-                  { role: "system", content: system },
-                  { role: "user", content: question },
-                ],
-              }),
-            },
-          );
-
-          if (!res.ok) {
-            const text = await res.text().catch(() => "");
-            return json(
-              { error: `AI request failed: ${res.status} ${text}` },
-              res.status,
-            );
-          }
-          const data = (await res.json()) as {
+          const data = (await chatRes.json()) as {
             choices?: { message?: { content?: string } }[];
           };
           const answer = data.choices?.[0]?.message?.content ?? "";
-          return json({ answer, sources });
+
+          const citations = hits.map((h, i) => ({
+            ref: i + 1,
+            document_id: h.document_id,
+            document_name: nameById.get(h.document_id) ?? "document",
+            page_number: h.page_number,
+            snippet: h.chunk_text.slice(0, 220),
+            similarity: Number(h.similarity?.toFixed?.(3) ?? h.similarity),
+          }));
+
+          return json({ answer, citations });
         } catch (e: any) {
           console.error("ask-pdf error", e);
           return json({ error: e?.message ?? "Unknown error" }, 500);
