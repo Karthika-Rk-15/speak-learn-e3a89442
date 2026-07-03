@@ -24,6 +24,7 @@ import { Route as DashboardMaterialsRouteImport } from './routes/dashboard.mater
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard.analytics'
 import { Route as ApiTutorRouteImport } from './routes/api/tutor'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiGenerateQuizRouteImport } from './routes/api/generate-quiz'
 import { Route as ApiEmbedPdfRouteImport } from './routes/api/embed-pdf'
 import { Route as ApiAskPdfRouteImport } from './routes/api/ask-pdf'
 
@@ -102,6 +103,11 @@ const ApiTtsRoute = ApiTtsRouteImport.update({
   path: '/api/tts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGenerateQuizRoute = ApiGenerateQuizRouteImport.update({
+  id: '/api/generate-quiz',
+  path: '/api/generate-quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiEmbedPdfRoute = ApiEmbedPdfRouteImport.update({
   id: '/api/embed-pdf',
   path: '/api/embed-pdf',
@@ -121,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/reviews': typeof ReviewsRoute
   '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/embed-pdf': typeof ApiEmbedPdfRoute
+  '/api/generate-quiz': typeof ApiGenerateQuizRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/reviews': typeof ReviewsRoute
   '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/embed-pdf': typeof ApiEmbedPdfRoute
+  '/api/generate-quiz': typeof ApiGenerateQuizRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/reviews': typeof ReviewsRoute
   '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/embed-pdf': typeof ApiEmbedPdfRoute
+  '/api/generate-quiz': typeof ApiGenerateQuizRoute
   '/api/tts': typeof ApiTtsRoute
   '/api/tutor': typeof ApiTutorRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/api/ask-pdf'
     | '/api/embed-pdf'
+    | '/api/generate-quiz'
     | '/api/tts'
     | '/api/tutor'
     | '/dashboard/analytics'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/api/ask-pdf'
     | '/api/embed-pdf'
+    | '/api/generate-quiz'
     | '/api/tts'
     | '/api/tutor'
     | '/dashboard/analytics'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/api/ask-pdf'
     | '/api/embed-pdf'
+    | '/api/generate-quiz'
     | '/api/tts'
     | '/api/tutor'
     | '/dashboard/analytics'
@@ -237,6 +249,7 @@ export interface RootRouteChildren {
   ReviewsRoute: typeof ReviewsRoute
   ApiAskPdfRoute: typeof ApiAskPdfRoute
   ApiEmbedPdfRoute: typeof ApiEmbedPdfRoute
+  ApiGenerateQuizRoute: typeof ApiGenerateQuizRoute
   ApiTtsRoute: typeof ApiTtsRoute
   ApiTutorRoute: typeof ApiTutorRoute
 }
@@ -348,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTtsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/generate-quiz': {
+      id: '/api/generate-quiz'
+      path: '/api/generate-quiz'
+      fullPath: '/api/generate-quiz'
+      preLoaderRoute: typeof ApiGenerateQuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/embed-pdf': {
       id: '/api/embed-pdf'
       path: '/api/embed-pdf'
@@ -399,6 +419,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewsRoute: ReviewsRoute,
   ApiAskPdfRoute: ApiAskPdfRoute,
   ApiEmbedPdfRoute: ApiEmbedPdfRoute,
+  ApiGenerateQuizRoute: ApiGenerateQuizRoute,
   ApiTtsRoute: ApiTtsRoute,
   ApiTutorRoute: ApiTutorRoute,
 }
