@@ -1,17 +1,32 @@
-import { Link, Outlet, useRouterState, createFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, useRouterState, useNavigate, createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
 import {
   LayoutDashboard, Brain, Mic, FileText, ListChecks, BarChart3, User, Settings,
-  Menu, X, Search, Bell,
+  Menu, X, Search, Bell, LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/visual/Logo";
 import { ThemeToggle } from "@/components/visual/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
+  ssr: false,
+  beforeLoad: async ({ location }) => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) {
+      throw redirect({ to: "/auth", search: { redirect: location.href } });
+    }
+    // Keep session_id in sync for existing data-scoping code
+    if (typeof window !== "undefined") {
+      localStorage.setItem("learnmate_session_id", data.user.id);
+      localStorage.setItem("learnmate.session_id", data.user.id);
+    }
+    return { userId: data.user.id, email: data.user.email };
+  },
   component: DashboardLayout,
 });
 
@@ -30,6 +45,18 @@ function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const { email, userId } = Route.useRouteContext();
+
+  const initial = (email?.[0] || "U").toUpperCase();
+
+  const handleLogout = async () => {
+    localStorage.removeItem("learnmate_session_id");
+    localStorage.removeItem("learnmate.session_id");
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+    navigate({ to: "/auth", replace: true });
+  };
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
@@ -123,7 +150,10 @@ function DashboardLayout() {
               <Bell className="h-5 w-5" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
             </Button>
-            <Link to="/dashboard/profile" className="grid h-9 w-9 place-items-center rounded-full gradient-primary text-sm font-bold text-primary-foreground">A</Link>
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full" aria-label="Sign out" title="Sign out">
+              <LogOut className="h-5 w-5" />
+            </Button>
+            <Link to="/dashboard/profile" title={email ?? userId} className="grid h-9 w-9 place-items-center rounded-full gradient-primary text-sm font-bold text-primary-foreground">{initial}</Link>
           </div>
         </header>
 

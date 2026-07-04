@@ -1,17 +1,30 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
+import { LogOut } from "lucide-react";
 import * as Icons from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { achievements } from "@/lib/mock-data";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/profile")({
   component: ProfilePage,
 });
 
 function ProfilePage() {
+  const navigate = useNavigate();
+  const { email } = Route.useRouteContext();
+
+  const handleLogout = async () => {
+    localStorage.removeItem("learnmate_session_id");
+    localStorage.removeItem("learnmate.session_id");
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+    navigate({ to: "/auth", replace: true });
+  };
   return (
     <div className="space-y-6">
       <Card className="relative overflow-hidden border-border/50 p-0">
@@ -21,15 +34,20 @@ function ProfilePage() {
             A
           </div>
           <div className="flex-1 pt-2">
-            <h1 className="font-display text-2xl font-bold">Aarav Sharma</h1>
-            <p className="text-sm text-muted-foreground">B.Tech CSE · 3rd Year · IIT Madras</p>
+            <h1 className="font-display text-2xl font-bold">{email ?? "Learner"}</h1>
+            <p className="text-sm text-muted-foreground">Signed in with LearnMate AI</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge variant="secondary" className="rounded-full">Learning Level: Advanced</Badge>
               <Badge variant="secondary" className="rounded-full">🔥 24-day streak</Badge>
               <Badge variant="secondary" className="rounded-full">Top 5%</Badge>
             </div>
           </div>
-          <Button variant="outline" className="rounded-full">Edit Profile</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="rounded-full">Edit Profile</Button>
+            <Button variant="outline" onClick={handleLogout} className="rounded-full">
+              <LogOut className="mr-2 h-4 w-4" /> Sign out
+            </Button>
+          </div>
         </div>
       </Card>
 
