@@ -1,17 +1,30 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
+import { LogOut } from "lucide-react";
 import * as Icons from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { achievements } from "@/lib/mock-data";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/profile")({
   component: ProfilePage,
 });
 
 function ProfilePage() {
+  const navigate = useNavigate();
+  const { email } = Route.useRouteContext();
+
+  const handleLogout = async () => {
+    localStorage.removeItem("learnmate_session_id");
+    localStorage.removeItem("learnmate.session_id");
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+    navigate({ to: "/auth", replace: true });
+  };
   return (
     <div className="space-y-6">
       <Card className="relative overflow-hidden border-border/50 p-0">
