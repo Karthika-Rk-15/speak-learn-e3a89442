@@ -150,7 +150,10 @@ function DashboardLayout() {
               <Bell className="h-5 w-5" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
             </Button>
-            <Link to="/dashboard/profile" className="grid h-9 w-9 place-items-center rounded-full gradient-primary text-sm font-bold text-primary-foreground">A</Link>
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full" aria-label="Sign out" title="Sign out">
+              <LogOut className="h-5 w-5" />
+            </Button>
+            <Link to="/dashboard/profile" title={email ?? userId} className="grid h-9 w-9 place-items-center rounded-full gradient-primary text-sm font-bold text-primary-foreground">{initial}</Link>
           </div>
         </header>
 
