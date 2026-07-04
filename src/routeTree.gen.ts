@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReviewsRouteImport } from './routes/reviews'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as FeaturesRouteImport } from './routes/features'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -32,6 +33,11 @@ import { Route as ApiAskPdfRouteImport } from './routes/api/ask-pdf'
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -131,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/embed-pdf': typeof ApiEmbedPdfRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/embed-pdf': typeof ApiEmbedPdfRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/features': typeof FeaturesRoute
   '/pricing': typeof PricingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/api/ask-pdf': typeof ApiAskPdfRoute
   '/api/embed-pdf': typeof ApiEmbedPdfRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/features'
     | '/pricing'
+    | '/reset-password'
     | '/reviews'
     | '/api/ask-pdf'
     | '/api/embed-pdf'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/features'
     | '/pricing'
+    | '/reset-password'
     | '/reviews'
     | '/api/ask-pdf'
     | '/api/embed-pdf'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/features'
     | '/pricing'
+    | '/reset-password'
     | '/reviews'
     | '/api/ask-pdf'
     | '/api/embed-pdf'
@@ -259,6 +271,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   FeaturesRoute: typeof FeaturesRoute
   PricingRoute: typeof PricingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewsRoute: typeof ReviewsRoute
   ApiAskPdfRoute: typeof ApiAskPdfRoute
   ApiEmbedPdfRoute: typeof ApiEmbedPdfRoute
@@ -274,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/reviews'
       fullPath: '/reviews'
       preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -437,6 +457,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   FeaturesRoute: FeaturesRoute,
   PricingRoute: PricingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ReviewsRoute: ReviewsRoute,
   ApiAskPdfRoute: ApiAskPdfRoute,
   ApiEmbedPdfRoute: ApiEmbedPdfRoute,
