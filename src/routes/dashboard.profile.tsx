@@ -34,15 +34,20 @@ function ProfilePage() {
             A
           </div>
           <div className="flex-1 pt-2">
-            <h1 className="font-display text-2xl font-bold">Aarav Sharma</h1>
-            <p className="text-sm text-muted-foreground">B.Tech CSE · 3rd Year · IIT Madras</p>
+            <h1 className="font-display text-2xl font-bold">{email ?? "Learner"}</h1>
+            <p className="text-sm text-muted-foreground">Signed in with LearnMate AI</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge variant="secondary" className="rounded-full">Learning Level: Advanced</Badge>
               <Badge variant="secondary" className="rounded-full">🔥 24-day streak</Badge>
               <Badge variant="secondary" className="rounded-full">Top 5%</Badge>
             </div>
           </div>
-          <Button variant="outline" className="rounded-full">Edit Profile</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="rounded-full">Edit Profile</Button>
+            <Button variant="outline" onClick={handleLogout} className="rounded-full">
+              <LogOut className="mr-2 h-4 w-4" /> Sign out
+            </Button>
+          </div>
         </div>
       </Card>
 
