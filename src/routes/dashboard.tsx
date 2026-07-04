@@ -1,17 +1,32 @@
-import { Link, Outlet, useRouterState, createFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, useRouterState, useNavigate, createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "motion/react";
 import {
   LayoutDashboard, Brain, Mic, FileText, ListChecks, BarChart3, User, Settings,
-  Menu, X, Search, Bell,
+  Menu, X, Search, Bell, LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/visual/Logo";
 import { ThemeToggle } from "@/components/visual/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
+  ssr: false,
+  beforeLoad: async ({ location }) => {
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) {
+      throw redirect({ to: "/auth", search: { redirect: location.href } });
+    }
+    // Keep session_id in sync for existing data-scoping code
+    if (typeof window !== "undefined") {
+      localStorage.setItem("learnmate_session_id", data.user.id);
+      localStorage.setItem("learnmate.session_id", data.user.id);
+    }
+    return { userId: data.user.id, email: data.user.email };
+  },
   component: DashboardLayout,
 });
 
