@@ -45,6 +45,18 @@ function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const { email, userId } = Route.useRouteContext();
+
+  const initial = (email?.[0] || "U").toUpperCase();
+
+  const handleLogout = async () => {
+    localStorage.removeItem("learnmate_session_id");
+    localStorage.removeItem("learnmate.session_id");
+    await supabase.auth.signOut();
+    toast.success("Signed out");
+    navigate({ to: "/auth", replace: true });
+  };
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
