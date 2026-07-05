@@ -138,7 +138,7 @@ function ProfilePage() {
     .split(/[\s@._-]+/)
     .filter(Boolean)
     .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
+    .map((s: string) => s[0]?.toUpperCase())
     .join("") || "U";
   const joined = profile?.created_at ? new Date(profile.created_at) : null;
 
