@@ -110,7 +110,7 @@ function DashboardLayout() {
                   />
                 )}
                 <item.icon className={cn("h-5 w-5 shrink-0", active && "text-primary")} />
-                {!collapsed && <span className="truncate">{item.label}</span>}
+                {!collapsed && <span className="truncate">{t(item.labelKey)}</span>}
                 {active && !collapsed && (
                   <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />
                 )}
@@ -121,9 +121,9 @@ function DashboardLayout() {
 
         {!collapsed && (
           <div className="m-3 rounded-2xl gradient-primary p-4 text-primary-foreground shadow-glow">
-            <p className="text-sm font-semibold">Upgrade to Pro</p>
-            <p className="mt-1 text-xs opacity-90">Unlock unlimited AI tutoring</p>
-            <Button size="sm" className="mt-3 w-full bg-white text-primary hover:bg-white/90">Upgrade</Button>
+            <p className="text-sm font-semibold">{t("nav.upgrade")}</p>
+            <p className="mt-1 text-xs opacity-90">{t("nav.upgrade.desc")}</p>
+            <Button size="sm" className="mt-3 w-full bg-white text-primary hover:bg-white/90">{t("nav.upgrade.cta")}</Button>
           </div>
         )}
       </aside>
@@ -144,7 +144,7 @@ function DashboardLayout() {
           </button>
           <div className="relative hidden flex-1 max-w-md md:block">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search topics, notes, quizzes..." className="pl-9 bg-muted/50 border-transparent focus-visible:bg-background" />
+            <Input placeholder={t("nav.search")} className="pl-9 bg-muted/50 border-transparent focus-visible:bg-background" />
           </div>
           <div className="ml-auto flex items-center gap-1.5">
             <ThemeToggle />
@@ -152,7 +152,7 @@ function DashboardLayout() {
               <Bell className="h-5 w-5" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full" aria-label="Sign out" title="Sign out">
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-full" aria-label={t("nav.signout")} title={t("nav.signout")}>
               <LogOut className="h-5 w-5" />
             </Button>
             <Link to="/dashboard/profile" title={email ?? userId} className="grid h-9 w-9 place-items-center rounded-full gradient-primary text-sm font-bold text-primary-foreground">{initial}</Link>
