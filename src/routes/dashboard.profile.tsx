@@ -216,21 +216,21 @@ function ProfilePage() {
       <Card className="border-border/50 p-6">
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm font-semibold">Study Analytics</p>
+          <p className="text-sm font-semibold">{t("profile.analytics")}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-xs text-muted-foreground">Average Quiz Score</p>
+            <p className="text-xs text-muted-foreground">{t("profile.avg")}</p>
             <p className="mt-1 font-display text-2xl font-bold">
               {stats.avgScore !== null ? `${stats.avgScore}%` : "0%"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total Attempts</p>
+            <p className="text-xs text-muted-foreground">{t("profile.total")}</p>
             <p className="mt-1 font-display text-2xl font-bold">{stats.quizzes}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Documents Studied</p>
+            <p className="text-xs text-muted-foreground">{t("profile.docs")}</p>
             <p className="mt-1 font-display text-2xl font-bold">{stats.materials}</p>
           </div>
         </div>
