@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/dashboard/tutor")({
   component: TutorPage,
@@ -21,6 +22,7 @@ const suggestions = [
 type Msg = { role: "user" | "ai"; content: string };
 
 function TutorPage() {
+  const t = useT();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
 
@@ -43,8 +45,8 @@ function TutorPage() {
           <Brain className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">AI Tutor</h1>
-          <p className="text-sm text-muted-foreground">Personalized explanations on any topic</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight">{t("tutor.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("tutor.subtitle")}</p>
         </div>
       </div>
 
