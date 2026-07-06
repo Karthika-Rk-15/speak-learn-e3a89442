@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/visual/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
@@ -31,17 +32,18 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 const nav = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/dashboard/tutor", label: "AI Tutor", icon: Brain },
-  { to: "/dashboard/voice", label: "Voice Assistant", icon: Mic },
-  { to: "/dashboard/materials", label: "Study Materials", icon: FileText },
-  { to: "/dashboard/quiz", label: "Quiz Center", icon: ListChecks },
-  { to: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/dashboard/profile", label: "Profile", icon: User },
-  { to: "/dashboard/settings", label: "Settings", icon: Settings },
+  { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/dashboard/tutor", labelKey: "nav.tutor", icon: Brain },
+  { to: "/dashboard/voice", labelKey: "nav.voice", icon: Mic },
+  { to: "/dashboard/materials", labelKey: "nav.materials", icon: FileText },
+  { to: "/dashboard/quiz", labelKey: "nav.quiz", icon: ListChecks },
+  { to: "/dashboard/analytics", labelKey: "nav.analytics", icon: BarChart3 },
+  { to: "/dashboard/profile", labelKey: "nav.profile", icon: User },
+  { to: "/dashboard/settings", labelKey: "nav.settings", icon: Settings },
 ] as const;
 
 function DashboardLayout() {
+  const t = useT();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
