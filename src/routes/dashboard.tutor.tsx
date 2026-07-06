@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/dashboard/tutor")({
   component: TutorPage,
@@ -21,6 +22,7 @@ const suggestions = [
 type Msg = { role: "user" | "ai"; content: string };
 
 function TutorPage() {
+  const t = useT();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
 
@@ -43,8 +45,8 @@ function TutorPage() {
           <Brain className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight">AI Tutor</h1>
-          <p className="text-sm text-muted-foreground">Personalized explanations on any topic</p>
+          <h1 className="font-display text-2xl font-bold tracking-tight">{t("tutor.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("tutor.subtitle")}</p>
         </div>
       </div>
 
@@ -53,7 +55,7 @@ function TutorPage() {
           <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl gradient-primary text-primary-foreground shadow-glow">
             <Sparkles className="h-8 w-8" />
           </div>
-          <h2 className="font-display text-xl font-semibold">What do you want to learn today?</h2>
+          <h2 className="font-display text-xl font-semibold">{t("tutor.prompt")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">Pick a starter or ask anything below.</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {suggestions.map((s) => (

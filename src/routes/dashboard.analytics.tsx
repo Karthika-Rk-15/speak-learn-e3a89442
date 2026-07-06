@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, TrendingUp, TrendingDown, FileText, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, ResponsiveContainer,
   XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Legend,
@@ -336,15 +337,17 @@ function AnalyticsPage() {
 }
 
 function Header() {
+  const t = useT();
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold tracking-tight">Learning Analytics</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">{t("analytics.title")}</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Insights from your quiz performance and study sessions.
+        {t("analytics.subtitle")}
       </p>
     </div>
   );
 }
+
 
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: "up" | "down" }) {
   return (

@@ -11,6 +11,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/profile")({
@@ -34,6 +35,7 @@ type Stats = {
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const t = useT();
   const { email, userId } = Route.useRouteContext();
 
   const [loading, setLoading] = useState(true);
@@ -151,10 +153,10 @@ function ProfilePage() {
   }
 
   const statCards = [
-    { label: "Uploaded Materials", value: stats.materials, icon: FileText },
-    { label: "Quizzes Taken", value: stats.quizzes, icon: ListChecks },
-    { label: "AI Tutor Chats", value: stats.chats, icon: MessageSquare },
-    { label: "Voice Sessions", value: stats.voice, icon: Mic },
+    { label: t("profile.stat.materials"), value: stats.materials, icon: FileText },
+    { label: t("profile.stat.quizzes"), value: stats.quizzes, icon: ListChecks },
+    { label: t("profile.stat.chats"), value: stats.chats, icon: MessageSquare },
+    { label: t("profile.stat.voice"), value: stats.voice, icon: Mic },
   ];
 
   return (
@@ -188,10 +190,10 @@ function ProfilePage() {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="rounded-full" onClick={() => setEditOpen(true)}>
-              Edit Profile
+              {t("profile.edit")}
             </Button>
             <Button variant="outline" onClick={handleLogout} className="rounded-full">
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
+              <LogOut className="mr-2 h-4 w-4" /> {t("nav.signout")}
             </Button>
           </div>
         </div>
@@ -214,21 +216,21 @@ function ProfilePage() {
       <Card className="border-border/50 p-6">
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <p className="text-sm font-semibold">Study Analytics</p>
+          <p className="text-sm font-semibold">{t("profile.analytics")}</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-xs text-muted-foreground">Average Quiz Score</p>
+            <p className="text-xs text-muted-foreground">{t("profile.avg")}</p>
             <p className="mt-1 font-display text-2xl font-bold">
               {stats.avgScore !== null ? `${stats.avgScore}%` : "0%"}
             </p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Total Attempts</p>
+            <p className="text-xs text-muted-foreground">{t("profile.total")}</p>
             <p className="mt-1 font-display text-2xl font-bold">{stats.quizzes}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Documents Studied</p>
+            <p className="text-xs text-muted-foreground">{t("profile.docs")}</p>
             <p className="mt-1 font-display text-2xl font-bold">{stats.materials}</p>
           </div>
         </div>
