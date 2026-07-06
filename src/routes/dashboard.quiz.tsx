@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import {
   ResponsiveContainer, RadialBar, RadialBarChart, PolarAngleAxis,
 } from "recharts";
@@ -46,6 +47,7 @@ function getSessionId() {
 }
 
 function QuizPage() {
+  const qt = useT();
   const [stage, setStage] = useState<Stage>("setup");
   const [difficulty, setDifficulty] = useState<"Easy" | "Medium" | "Hard">("Medium");
   const [numQuestions, setNumQuestions] = useState<5 | 10 | 20>(5);
@@ -128,9 +130,9 @@ function QuizPage() {
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl gradient-primary text-primary-foreground shadow-glow">
             <Trophy className="h-7 w-7" />
           </div>
-          <h1 className="mt-4 font-display text-3xl font-bold tracking-tight">Quiz Center</h1>
+          <h1 className="mt-4 font-display text-3xl font-bold tracking-tight">{qt("quiz.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            AI-generated quizzes from your uploaded documents.
+            {qt("quiz.subtitle")}
           </p>
         </div>
 
