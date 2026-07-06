@@ -190,10 +190,10 @@ function ProfilePage() {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="rounded-full" onClick={() => setEditOpen(true)}>
-              Edit Profile
+              {t("profile.edit")}
             </Button>
             <Button variant="outline" onClick={handleLogout} className="rounded-full">
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
+              <LogOut className="mr-2 h-4 w-4" /> {t("nav.signout")}
             </Button>
           </div>
         </div>
