@@ -11,6 +11,7 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/profile")({
@@ -34,6 +35,7 @@ type Stats = {
 
 function ProfilePage() {
   const navigate = useNavigate();
+  const t = useT();
   const { email, userId } = Route.useRouteContext();
 
   const [loading, setLoading] = useState(true);
@@ -151,10 +153,10 @@ function ProfilePage() {
   }
 
   const statCards = [
-    { label: "Uploaded Materials", value: stats.materials, icon: FileText },
-    { label: "Quizzes Taken", value: stats.quizzes, icon: ListChecks },
-    { label: "AI Tutor Chats", value: stats.chats, icon: MessageSquare },
-    { label: "Voice Sessions", value: stats.voice, icon: Mic },
+    { label: t("profile.stat.materials"), value: stats.materials, icon: FileText },
+    { label: t("profile.stat.quizzes"), value: stats.quizzes, icon: ListChecks },
+    { label: t("profile.stat.chats"), value: stats.chats, icon: MessageSquare },
+    { label: t("profile.stat.voice"), value: stats.voice, icon: Mic },
   ];
 
   return (
