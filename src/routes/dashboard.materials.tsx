@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/dashboard/materials")({
   component: MaterialsPage,
@@ -57,6 +58,7 @@ type Citation = {
 };
 
 function MaterialsPage() {
+  const t = useT();
   const [query, setQuery] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [askInput, setAskInput] = useState("");
@@ -208,8 +210,8 @@ function MaterialsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight">Study Materials</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Upload your PDFs and ask anything — answers grounded in your material.</p>
+        <h1 className="font-display text-3xl font-bold tracking-tight">{t("materials.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("materials.subtitle")}</p>
       </div>
 
       {/* Upload zone */}
