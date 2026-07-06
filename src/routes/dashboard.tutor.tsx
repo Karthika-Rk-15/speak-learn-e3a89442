@@ -55,7 +55,7 @@ function TutorPage() {
           <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-2xl gradient-primary text-primary-foreground shadow-glow">
             <Sparkles className="h-8 w-8" />
           </div>
-          <h2 className="font-display text-xl font-semibold">What do you want to learn today?</h2>
+          <h2 className="font-display text-xl font-semibold">{t("tutor.prompt")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">Pick a starter or ask anything below.</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             {suggestions.map((s) => (
