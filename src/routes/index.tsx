@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
-  Mic, Brain, FileText, Sparkles, Languages, TrendingUp, Play, ArrowRight,
+  Mic, Brain, FileText, Sparkles, Languages, TrendingUp, ArrowRight,
   Check, Star, BookOpen, Zap, MessageSquare, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
