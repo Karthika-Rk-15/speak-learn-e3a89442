@@ -1,13 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
-  Mic, Brain, FileText, Sparkles, Languages, TrendingUp, Play, ArrowRight,
+  Mic, Brain, FileText, Sparkles, Languages, TrendingUp, ArrowRight,
   Check, Star, BookOpen, Zap, MessageSquare, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { DemoModalTrigger } from "@/components/site/DemoModal";
 import { MeshBackground, Particles } from "@/components/visual/Backgrounds";
 import { Waveform } from "@/components/visual/Waveform";
 import { testimonials } from "@/lib/mock-data";
@@ -61,9 +62,7 @@ function Landing() {
               <Button asChild variant="hero" size="xl" className="rounded-full">
                 <Link to="/dashboard">Start Learning <ArrowRight className="ml-1 h-5 w-5" /></Link>
               </Button>
-              <Button variant="glass" size="xl" className="rounded-full">
-                <Play className="h-5 w-5" /> Watch Demo
-              </Button>
+              <DemoModalTrigger />
             </div>
             <div className="mt-10 flex flex-wrap items-center gap-6 text-xs text-muted-foreground">
               <div className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Free to start</div>
