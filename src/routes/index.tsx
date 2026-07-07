@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { DemoModalTrigger } from "@/components/site/DemoModal";
 import { MeshBackground, Particles } from "@/components/visual/Backgrounds";
 import { Waveform } from "@/components/visual/Waveform";
 import { testimonials } from "@/lib/mock-data";
