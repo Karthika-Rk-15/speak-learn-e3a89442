@@ -15,11 +15,12 @@ export const Route = createFileRoute("/api/tutor")({
         }
         const key = process.env.LOVABLE_API_KEY;
         if (!key) {
-          return new Response(JSON.stringify({ error: "AI not configured" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          });
+          return new Response(
+            JSON.stringify({ error: "Server not configured: missing LOVABLE_API_KEY" }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
+          );
         }
+
 
         const system = `You are LearnMate AI, a friendly, encouraging educational tutor.
 The learner's level is: ${level.toUpperCase()}.
