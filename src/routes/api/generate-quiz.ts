@@ -22,12 +22,17 @@ export const Route = createFileRoute("/api/generate-quiz")({
 
           const url = process.env.SUPABASE_URL;
           const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          const geminiKey = process.env.GEMINI_API_KEY;
+          const aiKey = process.env.LOVABLE_API_KEY;
 
-          console.log("SUPABASE_URL:", url);
-          console.log("SERVICE_ROLE_KEY:", !!serviceKey);
-          console.log("GEMINI_API_KEY:", !!geminiKey);
-          if (!url || !serviceKey || !geminiKey) return json({ error: "Server not configured" }, 500);
+          const missing = [
+            !url && "SUPABASE_URL",
+            !serviceKey && "SUPABASE_SERVICE_ROLE_KEY",
+            !aiKey && "LOVABLE_API_KEY",
+          ].filter(Boolean);
+          if (missing.length) {
+            return json({ error: `Server not configured: missing ${missing.join(", ")}` }, 500);
+          }
+
 
           const admin = createClient(url, serviceKey, {
             auth: { persistSession: false, autoRefreshToken: false },
