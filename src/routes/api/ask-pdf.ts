@@ -18,11 +18,19 @@ export const Route = createFileRoute("/api/ask-pdf")({
           const url = process.env.SUPABASE_URL;
           const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
           const aiKey = process.env.LOVABLE_API_KEY;
-          if (!url || !serviceKey || !aiKey) return json({ error: "Server not configured" }, 500);
+          const missing = [
+            !url && "SUPABASE_URL",
+            !serviceKey && "SUPABASE_SERVICE_ROLE_KEY",
+            !aiKey && "LOVABLE_API_KEY",
+          ].filter(Boolean);
+          if (missing.length) {
+            return json({ error: `Server not configured: missing ${missing.join(", ")}` }, 500);
+          }
 
-          const admin = createClient(url, serviceKey, {
+          const admin = createClient(url!, serviceKey!, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
+
 
           // 1) Embed the question
           const embRes = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
