@@ -112,13 +112,44 @@ ${context}`;
             choices?: { message?: { content?: string } }[];
           };
           const raw = data.choices?.[0]?.message?.content ?? "";
-          let parsed: { title?: string; questions?: any[] };
+          let rawParsed: any;
           try {
-            parsed = JSON.parse(raw);
+            rawParsed = JSON.parse(raw);
           } catch {
-            const m = raw.match(/\{[\s\S]*\}/);
-            parsed = m ? JSON.parse(m[0]) : { questions: [] };
+            const m = raw.match(/[[{][\s\S]*[\]}]/);
+            try {
+              rawParsed = m ? JSON.parse(m[0]) : null;
+            } catch {
+              rawParsed = null;
+            }
           }
+
+          // Models sometimes wrap the object in an array, nest it under a key,
+          // or return a bare array of questions — normalize all of those.
+          const normalize = (v: any): { title?: string; questions?: any[] } => {
+            if (!v) return { questions: [] };
+            if (Array.isArray(v)) {
+              if (v.length && v[0] && typeof v[0] === "object" && "question" in v[0]) {
+                return { questions: v };
+              }
+              for (const item of v) {
+                const n = normalize(item);
+                if (n.questions?.length) return n;
+              }
+              return { questions: [] };
+            }
+            if (typeof v === "object") {
+              if (Array.isArray(v.questions)) return v;
+              if (Array.isArray(v.quiz)) return { title: v.title, questions: v.quiz };
+              if (Array.isArray(v.items)) return { title: v.title, questions: v.items };
+              if (v.quiz && typeof v.quiz === "object") {
+                const n = normalize(v.quiz);
+                if (n.questions?.length) return { title: v.title ?? n.title, questions: n.questions };
+              }
+            }
+            return { questions: [] };
+          };
+          const parsed = normalize(rawParsed);
 
           const questions = (parsed.questions ?? [])
             .filter(
