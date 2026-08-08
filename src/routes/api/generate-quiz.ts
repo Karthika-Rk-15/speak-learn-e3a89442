@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { GoogleGenAI } from "@google/genai";
+
 
 type Body = {
   sessionId: string;
