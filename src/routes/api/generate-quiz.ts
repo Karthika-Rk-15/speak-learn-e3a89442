@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/generate-quiz")({
           }
 
 
-          const admin = createClient(url, serviceKey, {
+          const admin = createClient(url!, serviceKey!, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
 
