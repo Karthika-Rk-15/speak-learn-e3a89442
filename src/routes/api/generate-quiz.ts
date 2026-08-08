@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { GoogleGenAI } from "@google/genai";
+
 
 type Body = {
   sessionId: string;
@@ -22,14 +22,19 @@ export const Route = createFileRoute("/api/generate-quiz")({
 
           const url = process.env.SUPABASE_URL;
           const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          const geminiKey = process.env.GEMINI_API_KEY;
+          const aiKey = process.env.LOVABLE_API_KEY;
 
-          console.log("SUPABASE_URL:", url);
-          console.log("SERVICE_ROLE_KEY:", !!serviceKey);
-          console.log("GEMINI_API_KEY:", !!geminiKey);
-          if (!url || !serviceKey || !geminiKey) return json({ error: "Server not configured" }, 500);
+          const missing = [
+            !url && "SUPABASE_URL",
+            !serviceKey && "SUPABASE_SERVICE_ROLE_KEY",
+            !aiKey && "LOVABLE_API_KEY",
+          ].filter(Boolean);
+          if (missing.length) {
+            return json({ error: `Server not configured: missing ${missing.join(", ")}` }, 500);
+          }
 
-          const admin = createClient(url, serviceKey, {
+
+          const admin = createClient(url!, serviceKey!, {
             auth: { persistSession: false, autoRefreshToken: false },
           });
 
@@ -97,25 +102,48 @@ Return ONLY valid JSON matching this schema, with NO markdown fences:
 CONTEXT:
 ${context}`;
 
-          const ai = new GoogleGenAI({
-  apiKey: geminiKey,
-});
+          const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "google/gemini-3-flash-preview",
+              messages: [
+                { role: "system", content: system },
+                {
+                  role: "user",
+                  content: `Generate ${n} ${difficulty} multiple-choice questions as JSON only.`,
+                },
+              ],
+            }),
+          });
+          if (!aiRes.ok) {
+            const t = await aiRes.text().catch(() => "");
+            return json({ error: `AI request failed: ${aiRes.status} ${t}` }, aiRes.status);
+          }
+          const aiData = (await aiRes.json()) as { choices?: { message?: { content?: string } }[] };
+          const raw = aiData.choices?.[0]?.message?.content ?? "";
 
-const response = await ai.models.generateContent({
-  model: "gemini-2.5-flash",
-  contents: `${system}
+          const normalize = (v: any): { title?: string; questions?: any[] } => {
+            if (Array.isArray(v)) {
+              if (v.length && v[0]?.question) return { questions: v };
+              return normalize(v[0]);
+            }
+            if (v && typeof v === "object") {
+              if (Array.isArray(v.questions)) return v;
+              if (Array.isArray(v.quiz)) return { title: v.title, questions: v.quiz };
+              if (Array.isArray(v.items)) return { title: v.title, questions: v.items };
+            }
+            return { questions: [] };
+          };
 
-Generate ${n} ${difficulty} multiple-choice questions.`,
-});
-
-const raw = response.text ?? "";
           let parsed: { title?: string; questions?: any[] };
           try {
-            parsed = JSON.parse(raw);
+            parsed = normalize(JSON.parse(raw));
           } catch {
-            const m = raw.match(/\{[\s\S]*\}/);
-            parsed = m ? JSON.parse(m[0]) : { questions: [] };
+            const m = raw.match(/[[{][\s\S]*[\]}]/);
+            parsed = m ? normalize(JSON.parse(m[0])) : { questions: [] };
           }
+
 
           const questions = (parsed.questions ?? [])
             .filter(
