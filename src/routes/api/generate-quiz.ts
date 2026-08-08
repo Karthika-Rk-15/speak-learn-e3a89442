@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { GoogleGenAI } from "@google/genai";
 
 type Body = {
   sessionId: string;
@@ -21,8 +22,12 @@ export const Route = createFileRoute("/api/generate-quiz")({
 
           const url = process.env.SUPABASE_URL;
           const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-          const aiKey = process.env.LOVABLE_API_KEY;
-          if (!url || !serviceKey || !aiKey) return json({ error: "Server not configured" }, 500);
+          const geminiKey = process.env.GEMINI_API_KEY;
+
+          console.log("SUPABASE_URL:", url);
+          console.log("SERVICE_ROLE_KEY:", !!serviceKey);
+          console.log("GEMINI_API_KEY:", !!geminiKey);
+          if (!url || !serviceKey || !geminiKey) return json({ error: "Server not configured" }, 500);
 
           const admin = createClient(url, serviceKey, {
             auth: { persistSession: false, autoRefreshToken: false },
@@ -92,64 +97,25 @@ Return ONLY valid JSON matching this schema, with NO markdown fences:
 CONTEXT:
 ${context}`;
 
-          const chatRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              model: "google/gemini-3-flash-preview",
-              messages: [
-                { role: "system", content: system },
-                { role: "user", content: `Generate ${n} ${difficulty} questions now.` },
-              ],
-              response_format: { type: "json_object" },
-            }),
-          });
-          if (!chatRes.ok) {
-            const t = await chatRes.text().catch(() => "");
-            return json({ error: `AI request failed: ${chatRes.status} ${t}` }, chatRes.status);
-          }
-          const data = (await chatRes.json()) as {
-            choices?: { message?: { content?: string } }[];
-          };
-          const raw = data.choices?.[0]?.message?.content ?? "";
-          let rawParsed: any;
-          try {
-            rawParsed = JSON.parse(raw);
-          } catch {
-            const m = raw.match(/[[{][\s\S]*[\]}]/);
-            try {
-              rawParsed = m ? JSON.parse(m[0]) : null;
-            } catch {
-              rawParsed = null;
-            }
-          }
+          const ai = new GoogleGenAI({
+  apiKey: geminiKey,
+});
 
-          // Models sometimes wrap the object in an array, nest it under a key,
-          // or return a bare array of questions — normalize all of those.
-          const normalize = (v: any): { title?: string; questions?: any[] } => {
-            if (!v) return { questions: [] };
-            if (Array.isArray(v)) {
-              if (v.length && v[0] && typeof v[0] === "object" && "question" in v[0]) {
-                return { questions: v };
-              }
-              for (const item of v) {
-                const n = normalize(item);
-                if (n.questions?.length) return n;
-              }
-              return { questions: [] };
-            }
-            if (typeof v === "object") {
-              if (Array.isArray(v.questions)) return v;
-              if (Array.isArray(v.quiz)) return { title: v.title, questions: v.quiz };
-              if (Array.isArray(v.items)) return { title: v.title, questions: v.items };
-              if (v.quiz && typeof v.quiz === "object") {
-                const n = normalize(v.quiz);
-                if (n.questions?.length) return { title: v.title ?? n.title, questions: n.questions };
-              }
-            }
-            return { questions: [] };
-          };
-          const parsed = normalize(rawParsed);
+const response = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: `${system}
+
+Generate ${n} ${difficulty} multiple-choice questions.`,
+});
+
+const raw = response.text ?? "";
+          let parsed: { title?: string; questions?: any[] };
+          try {
+            parsed = JSON.parse(raw);
+          } catch {
+            const m = raw.match(/\{[\s\S]*\}/);
+            parsed = m ? JSON.parse(m[0]) : { questions: [] };
+          }
 
           const questions = (parsed.questions ?? [])
             .filter(
