@@ -124,7 +124,10 @@ export const Route = createFileRoute("/api/embed-pdf")({
               slice.map((r) => r.chunk_text),
               aiKey!,
             );
-            const payload = slice.map((r, j) => ({ ...r, embedding: vectors[j] }));
+            const payload = slice.map((r, j) => ({
+              ...r,
+              embedding: JSON.stringify(vectors[j] ?? []),
+            }));
 
             const { error: insErr } = await admin.from("document_chunks").insert(payload);
             if (insErr) {
