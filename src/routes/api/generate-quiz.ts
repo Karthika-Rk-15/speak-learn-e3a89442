@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 
 
 type Body = {
@@ -20,23 +19,13 @@ export const Route = createFileRoute("/api/generate-quiz")({
           if (!sessionId) return json({ error: "Missing sessionId" }, 400);
           const n = [5, 10, 20].includes(numQuestions) ? numQuestions : 5;
 
-          const url = process.env.SUPABASE_URL;
-          const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
           const aiKey = process.env.LOVABLE_API_KEY;
 
-          const missing = [
-            !url && "SUPABASE_URL",
-            !serviceKey && "SUPABASE_SERVICE_ROLE_KEY",
-            !aiKey && "LOVABLE_API_KEY",
-          ].filter(Boolean);
-          if (missing.length) {
-            return json({ error: `Server not configured: missing ${missing.join(", ")}` }, 500);
+          if (!aiKey) {
+            return json({ error: "Server not configured: missing LOVABLE_API_KEY" }, 500);
           }
 
-
-          const admin = createClient(url!, serviceKey!, {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
+          const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
 
           // Pull a broad sample of chunks from this session's documents
           let q = admin
@@ -104,9 +93,13 @@ ${context}`;
 
           const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
-            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+            headers: {
+              "Lovable-API-Key": aiKey,
+              "X-Lovable-AIG-SDK": "fetch",
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
-              model: "google/gemini-3-flash-preview",
+              model: "google/gemini-3.6-flash",
               messages: [
                 { role: "system", content: system },
                 {

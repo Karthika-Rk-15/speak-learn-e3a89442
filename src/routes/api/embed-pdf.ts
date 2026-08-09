@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 
 type Body = { documentId: string };
 
@@ -28,7 +27,11 @@ function chunkText(text: string): string[] {
 async function embedBatch(texts: string[], apiKey: string): Promise<number[][]> {
   const res = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    headers: {
+      "Lovable-API-Key": apiKey,
+      "X-Lovable-AIG-SDK": "fetch",
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ model: EMBED_MODEL, input: texts }),
   });
 
@@ -57,22 +60,13 @@ export const Route = createFileRoute("/api/embed-pdf")({
           const { documentId } = (await request.json()) as Body;
           if (!documentId) return json({ error: "Missing documentId" }, 400);
 
-          const url = process.env.SUPABASE_URL;
-          const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
           const aiKey = process.env.LOVABLE_API_KEY;
 
-          const missing = [
-            !url && "SUPABASE_URL",
-            !serviceKey && "SUPABASE_SERVICE_ROLE_KEY",
-            !aiKey && "LOVABLE_API_KEY",
-          ].filter(Boolean);
-          if (missing.length) {
-            return json({ error: `Server not configured: missing ${missing.join(", ")}` }, 500);
+          if (!aiKey) {
+            return json({ error: "Server not configured: missing LOVABLE_API_KEY" }, 500);
           }
 
-          const admin = createClient(url!, serviceKey!, {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
+          const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
 
           const { data: doc, error: docErr } = await admin
             .from("documents")
@@ -130,7 +124,10 @@ export const Route = createFileRoute("/api/embed-pdf")({
               slice.map((r) => r.chunk_text),
               aiKey!,
             );
-            const payload = slice.map((r, j) => ({ ...r, embedding: vectors[j] }));
+            const payload = slice.map((r, j) => ({
+              ...r,
+              embedding: JSON.stringify(vectors[j] ?? []),
+            }));
 
             const { error: insErr } = await admin.from("document_chunks").insert(payload);
             if (insErr) {

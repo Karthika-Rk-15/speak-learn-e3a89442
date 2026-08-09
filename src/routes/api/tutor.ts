@@ -45,11 +45,12 @@ Be warm, concise, and avoid jargon unless you define it.`;
         const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${key}`,
+            "Lovable-API-Key": key,
+            "X-Lovable-AIG-SDK": "fetch",
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
+            model: "google/gemini-3.6-flash",
             messages: [
               { role: "system", content: system },
               { role: "user", content: question },
