@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createClient } from "@supabase/supabase-js";
 
 type Body = { question: string; sessionId: string };
 
@@ -15,27 +14,22 @@ export const Route = createFileRoute("/api/ask-pdf")({
             return json({ error: "Missing question or sessionId" }, 400);
           }
 
-          const url = process.env.SUPABASE_URL;
-          const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
           const aiKey = process.env.LOVABLE_API_KEY;
-          const missing = [
-            !url && "SUPABASE_URL",
-            !serviceKey && "SUPABASE_SERVICE_ROLE_KEY",
-            !aiKey && "LOVABLE_API_KEY",
-          ].filter(Boolean);
-          if (missing.length) {
-            return json({ error: `Server not configured: missing ${missing.join(", ")}` }, 500);
+          if (!aiKey) {
+            return json({ error: "Server not configured: missing LOVABLE_API_KEY" }, 500);
           }
 
-          const admin = createClient(url!, serviceKey!, {
-            auth: { persistSession: false, autoRefreshToken: false },
-          });
+          const { supabaseAdmin: admin } = await import("@/integrations/supabase/client.server");
 
 
           // 1) Embed the question
           const embRes = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
             method: "POST",
-            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+            headers: {
+              "Lovable-API-Key": aiKey,
+              "X-Lovable-AIG-SDK": "fetch",
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
               model: "openai/text-embedding-3-small",
               input: question,
@@ -106,9 +100,13 @@ ${context}`;
 
           const chatRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
-            headers: { Authorization: `Bearer ${aiKey}`, "Content-Type": "application/json" },
+            headers: {
+              "Lovable-API-Key": aiKey,
+              "X-Lovable-AIG-SDK": "fetch",
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
-              model: "google/gemini-3-flash-preview",
+              model: "google/gemini-3.6-flash",
               messages: [
                 { role: "system", content: system },
                 { role: "user", content: question },
