@@ -152,6 +152,23 @@ function DashboardHome() {
           });
         }
 
+        // Real quiz results, oldest -> newest, last 8 attempts
+        const ordered = [...attempts].reverse().slice(-8);
+        const quizScores = ordered.map((a, i) => ({
+          label: `Q${i + 1}`,
+          score: a.total > 0 ? Math.round((a.score / a.total) * 100) : 0,
+          target: 100,
+        }));
+        const progress = ordered.map((a, i) => {
+          const slice = ordered.slice(0, i + 1);
+          const avg =
+            (slice.reduce((s, x) => s + (x.total > 0 ? x.score / x.total : 0), 0) / slice.length) * 100;
+          return {
+            week: new Date(a.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+            progress: Math.round(avg),
+          };
+        });
+
         if (cancelled) return;
         setData({
           name: profRes.data?.display_name || email?.split("@")[0] || "Learner",
@@ -160,7 +177,10 @@ function DashboardHome() {
           streak: calcStreak([...chats.map((c) => c.created_at), ...attempts.map((a) => a.created_at)]),
           recent: chats.slice(0, 5),
           weekly,
+          quizScores,
+          progress,
         });
+
       } catch (e) {
         console.error(e);
       } finally {
