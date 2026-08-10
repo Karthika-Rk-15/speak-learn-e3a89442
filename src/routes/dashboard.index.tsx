@@ -71,7 +71,10 @@ type Data = {
   streak: number;
   recent: ChatRow[];
   weekly: { day: string; questions: number }[];
+  quizScores: { label: string; score: number; target: number }[];
+  progress: { week: string; progress: number }[];
 };
+
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
 
