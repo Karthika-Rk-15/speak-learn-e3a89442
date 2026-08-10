@@ -10,7 +10,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { subjectPerformance, learningProgress } from "@/lib/mock-data";
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -71,7 +71,10 @@ type Data = {
   streak: number;
   recent: ChatRow[];
   weekly: { day: string; questions: number }[];
+  quizScores: { label: string; score: number; target: number }[];
+  progress: { week: string; progress: number }[];
 };
+
 
 const dayKey = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -149,6 +152,23 @@ function DashboardHome() {
           });
         }
 
+        // Real quiz results, oldest -> newest, last 8 attempts
+        const ordered = [...attempts].reverse().slice(-8);
+        const quizScores = ordered.map((a, i) => ({
+          label: `Q${i + 1}`,
+          score: a.total > 0 ? Math.round((a.score / a.total) * 100) : 0,
+          target: 100,
+        }));
+        const progress = ordered.map((a, i) => {
+          const slice = ordered.slice(0, i + 1);
+          const avg =
+            (slice.reduce((s, x) => s + (x.total > 0 ? x.score / x.total : 0), 0) / slice.length) * 100;
+          return {
+            week: new Date(a.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+            progress: Math.round(avg),
+          };
+        });
+
         if (cancelled) return;
         setData({
           name: profRes.data?.display_name || email?.split("@")[0] || "Learner",
@@ -157,7 +177,10 @@ function DashboardHome() {
           streak: calcStreak([...chats.map((c) => c.created_at), ...attempts.map((a) => a.created_at)]),
           recent: chats.slice(0, 5),
           weekly,
+          quizScores,
+          progress,
         });
+
       } catch (e) {
         console.error(e);
       } finally {
@@ -249,34 +272,43 @@ function DashboardHome() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="border-border/50 p-5">
-          <h3 className="font-display text-lg font-semibold">Subject Performance</h3>
-          <p className="text-xs text-muted-foreground">Score vs target</p>
-          <ResponsiveContainer width="100%" height={240} className="mt-4">
-            <BarChart data={subjectPerformance}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-              <XAxis dataKey="subject" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 12 }} />
-              <Bar dataKey="target" fill="var(--color-muted)" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="score" fill="var(--color-chart-1)" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <h3 className="font-display text-lg font-semibold">Quiz Performance</h3>
+          <p className="text-xs text-muted-foreground">Your last quiz attempts (%)</p>
+          {data.quizScores.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">No quiz attempts yet.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={240} className="mt-4">
+              <BarChart data={data.quizScores}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <XAxis dataKey="label" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis domain={[0, 100]} stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 12 }} />
+                <Bar dataKey="target" fill="var(--color-muted)" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="score" fill="var(--color-chart-1)" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </Card>
 
         <Card className="border-border/50 p-5">
           <h3 className="font-display text-lg font-semibold">Learning Progress</h3>
-          <p className="text-xs text-muted-foreground">8-week trajectory</p>
-          <ResponsiveContainer width="100%" height={240} className="mt-4">
-            <LineChart data={learningProgress}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-              <XAxis dataKey="week" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 12 }} />
-              <Line type="monotone" dataKey="progress" stroke="var(--color-chart-2)" strokeWidth={3} dot={{ r: 5, fill: "var(--color-chart-2)" }} activeDot={{ r: 7 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          <p className="text-xs text-muted-foreground">Running average score</p>
+          {data.progress.length === 0 ? (
+            <p className="py-16 text-center text-sm text-muted-foreground">Take a quiz to see progress.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={240} className="mt-4">
+              <LineChart data={data.progress}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <XAxis dataKey="week" stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis domain={[0, 100]} stroke="var(--color-muted-foreground)" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: "var(--color-card)", border: "1px solid var(--color-border)", borderRadius: 12 }} />
+                <Line type="monotone" dataKey="progress" stroke="var(--color-chart-2)" strokeWidth={3} dot={{ r: 5, fill: "var(--color-chart-2)" }} activeDot={{ r: 7 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </Card>
       </div>
+
 
       <Card className="border-border/50 p-5">
         <div className="mb-3 flex items-center justify-between">
